@@ -1,0 +1,418 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		83944A53173B431D0041F14D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83944A52173B431D0041F14D /* Foundation.framework */; };
+		83944A58173B431D0041F14D /* HIBC.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 83944A57173B431D0041F14D /* HIBC.h */; };
+		83944A5A173B431D0041F14D /* HIBC.m in Sources */ = {isa = PBXBuildFile; fileRef = 83944A59173B431D0041F14D /* HIBC.m */; };
+		83944A62173B431D0041F14D /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83944A61173B431D0041F14D /* SenTestingKit.framework */; };
+		83944A64173B431D0041F14D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83944A63173B431D0041F14D /* UIKit.framework */; };
+		83944A65173B431D0041F14D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83944A52173B431D0041F14D /* Foundation.framework */; };
+		83944A68173B431D0041F14D /* libHIBCParser.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 83944A4F173B431D0041F14D /* libHIBCParser.a */; };
+		83944A6E173B431D0041F14D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 83944A6C173B431D0041F14D /* InfoPlist.strings */; };
+		83944A71173B431D0041F14D /* HIBCParserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 83944A70173B431D0041F14D /* HIBCParserTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		83944A66173B431D0041F14D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83944A47173B431D0041F14D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 83944A4E173B431D0041F14D;
+			remoteInfo = HIBCParser;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		83944A4D173B431D0041F14D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
+				83944A58173B431D0041F14D /* HIBC.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		83944A4F173B431D0041F14D /* libHIBCParser.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHIBCParser.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		83944A52173B431D0041F14D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		83944A56173B431D0041F14D /* HIBCParser-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HIBCParser-Prefix.pch"; sourceTree = "<group>"; };
+		83944A57173B431D0041F14D /* HIBC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HIBC.h; sourceTree = "<group>"; };
+		83944A59173B431D0041F14D /* HIBC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HIBC.m; sourceTree = "<group>"; };
+		83944A60173B431D0041F14D /* HIBCParserTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HIBCParserTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		83944A61173B431D0041F14D /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		83944A63173B431D0041F14D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		83944A6B173B431D0041F14D /* HIBCParserTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "HIBCParserTests-Info.plist"; sourceTree = "<group>"; };
+		83944A6D173B431D0041F14D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		83944A6F173B431D0041F14D /* HIBCParserTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HIBCParserTests.h; sourceTree = "<group>"; };
+		83944A70173B431D0041F14D /* HIBCParserTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HIBCParserTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		83944A4C173B431D0041F14D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83944A53173B431D0041F14D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83944A5C173B431D0041F14D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83944A62173B431D0041F14D /* SenTestingKit.framework in Frameworks */,
+				83944A64173B431D0041F14D /* UIKit.framework in Frameworks */,
+				83944A65173B431D0041F14D /* Foundation.framework in Frameworks */,
+				83944A68173B431D0041F14D /* libHIBCParser.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		83944A46173B431D0041F14D = {
+			isa = PBXGroup;
+			children = (
+				83944A54173B431D0041F14D /* HIBCParser */,
+				83944A69173B431D0041F14D /* HIBCParserTests */,
+				83944A51173B431D0041F14D /* Frameworks */,
+				83944A50173B431D0041F14D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		83944A50173B431D0041F14D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				83944A4F173B431D0041F14D /* libHIBCParser.a */,
+				83944A60173B431D0041F14D /* HIBCParserTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		83944A51173B431D0041F14D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				83944A52173B431D0041F14D /* Foundation.framework */,
+				83944A61173B431D0041F14D /* SenTestingKit.framework */,
+				83944A63173B431D0041F14D /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83944A54173B431D0041F14D /* HIBCParser */ = {
+			isa = PBXGroup;
+			children = (
+				83944A57173B431D0041F14D /* HIBC.h */,
+				83944A59173B431D0041F14D /* HIBC.m */,
+				83944A55173B431D0041F14D /* Supporting Files */,
+			);
+			path = HIBCParser;
+			sourceTree = "<group>";
+		};
+		83944A55173B431D0041F14D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				83944A56173B431D0041F14D /* HIBCParser-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		83944A69173B431D0041F14D /* HIBCParserTests */ = {
+			isa = PBXGroup;
+			children = (
+				83944A6F173B431D0041F14D /* HIBCParserTests.h */,
+				83944A70173B431D0041F14D /* HIBCParserTests.m */,
+				83944A6A173B431D0041F14D /* Supporting Files */,
+			);
+			path = HIBCParserTests;
+			sourceTree = "<group>";
+		};
+		83944A6A173B431D0041F14D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				83944A6B173B431D0041F14D /* HIBCParserTests-Info.plist */,
+				83944A6C173B431D0041F14D /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		83944A4E173B431D0041F14D /* HIBCParser */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83944A74173B431D0041F14D /* Build configuration list for PBXNativeTarget "HIBCParser" */;
+			buildPhases = (
+				83944A4B173B431D0041F14D /* Sources */,
+				83944A4C173B431D0041F14D /* Frameworks */,
+				83944A4D173B431D0041F14D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HIBCParser;
+			productName = HIBCParser;
+			productReference = 83944A4F173B431D0041F14D /* libHIBCParser.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		83944A5F173B431D0041F14D /* HIBCParserTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83944A77173B431D0041F14D /* Build configuration list for PBXNativeTarget "HIBCParserTests" */;
+			buildPhases = (
+				83944A5B173B431D0041F14D /* Sources */,
+				83944A5C173B431D0041F14D /* Frameworks */,
+				83944A5D173B431D0041F14D /* Resources */,
+				83944A5E173B431D0041F14D /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				83944A67173B431D0041F14D /* PBXTargetDependency */,
+			);
+			name = HIBCParserTests;
+			productName = HIBCParserTests;
+			productReference = 83944A60173B431D0041F14D /* HIBCParserTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83944A47173B431D0041F14D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = "JTL Systems";
+			};
+			buildConfigurationList = 83944A4A173B431D0041F14D /* Build configuration list for PBXProject "HIBCParser" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 83944A46173B431D0041F14D;
+			productRefGroup = 83944A50173B431D0041F14D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				83944A4E173B431D0041F14D /* HIBCParser */,
+				83944A5F173B431D0041F14D /* HIBCParserTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		83944A5D173B431D0041F14D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83944A6E173B431D0041F14D /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		83944A5E173B431D0041F14D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		83944A4B173B431D0041F14D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83944A5A173B431D0041F14D /* HIBC.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83944A5B173B431D0041F14D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83944A71173B431D0041F14D /* HIBCParserTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		83944A67173B431D0041F14D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 83944A4E173B431D0041F14D /* HIBCParser */;
+			targetProxy = 83944A66173B431D0041F14D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		83944A6C173B431D0041F14D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				83944A6D173B431D0041F14D /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		83944A72173B431D0041F14D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		83944A73173B431D0041F14D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		83944A75173B431D0041F14D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/HIBCParser.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HIBCParser/HIBCParser-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		83944A76173B431D0041F14D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/HIBCParser.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HIBCParser/HIBCParser-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		83944A78173B431D0041F14D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HIBCParser/HIBCParser-Prefix.pch";
+				INFOPLIST_FILE = "HIBCParserTests/HIBCParserTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		83944A79173B431D0041F14D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "HIBCParser/HIBCParser-Prefix.pch";
+				INFOPLIST_FILE = "HIBCParserTests/HIBCParserTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		83944A4A173B431D0041F14D /* Build configuration list for PBXProject "HIBCParser" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83944A72173B431D0041F14D /* Debug */,
+				83944A73173B431D0041F14D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83944A74173B431D0041F14D /* Build configuration list for PBXNativeTarget "HIBCParser" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83944A75173B431D0041F14D /* Debug */,
+				83944A76173B431D0041F14D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		83944A77173B431D0041F14D /* Build configuration list for PBXNativeTarget "HIBCParserTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83944A78173B431D0041F14D /* Debug */,
+				83944A79173B431D0041F14D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83944A47173B431D0041F14D /* Project object */;
+}
