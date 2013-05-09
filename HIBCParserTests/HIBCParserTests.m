@@ -17,6 +17,9 @@
     NSString *_serial;
     int _twoDigitQty;
     int _fiveDigitQty;
+    NSString *_manufCode;
+    NSString *_productNumber;
+    int _uom;
 }
 
 - (void)setUp {
@@ -31,6 +34,9 @@
     _serial = @"0001";
     _twoDigitQty = 24;
     _fiveDigitQty = 100;
+    _manufCode = @"Z999";
+    _productNumber = @"00999302035";
+    _uom = 1;
 }
 
 - (void)tearDown {
@@ -43,13 +49,17 @@
     [super tearDown];
 }
 
+/*
+    Slash tests
+ */
+
 - (void)testSlashCheckDigit {
 
     // Primary Barcode
-    HIBC *hibc = [HIBC decode:@"+H124009993020351/"];
-    NSAssert([@"H124" isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
-    NSAssert([@"00999302035" isEqualToString:hibc.productNumber], @"Product Number");
-    NSAssert(1 == hibc.unitOfMeasure, @"Unit of Measure");
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/"];
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
     NSAssert([@"/" isEqualToString:hibc.checkCharacter], @"Check Character");
 
     // Secondary Barcode
@@ -66,10 +76,10 @@
     NSAssert([@"/" isEqualToString:hibc.checkCharacter], @"Check Character");
 
     // Concatenated barcode
-    hibc = [HIBC decode:@"+H124009993019351/1715160668893E07/"];
-    NSAssert([@"H124" isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
-    NSAssert([@"00999301935" isEqualToString:hibc.productNumber], @"Product Number");
-    NSAssert(1 == hibc.unitOfMeasure, @"Unit of Measure");
+    hibc = [HIBC decode:@"+Z999009993020351/1715160668893E07/"];
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
     NSAssert([@"60668893E07" isEqualToString:hibc.lot], @"Lot");
     NSAssert([@"/" isEqualToString:hibc.checkCharacter], @"Check Character");
 }
@@ -104,7 +114,7 @@
 
 /*
     Tests from HIBC documentation lot/serial examples
-    These sufficiently test Secondary Barcodes
+    These sufficiently test Secondary Barcode date formatting
  */
 
 - (void)test01 {
@@ -492,7 +502,6 @@
     NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
 }
 
-
 - (void)test29 {
     HIBC *hibc = [HIBC decode:@"+$$+30509280001LC"];
 
@@ -507,7 +516,6 @@
     NSAssert([_linkChar isEqualToString:hibc.linkCharacter], @"Link Character");
     NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
 }
-
 
 - (void)test30 {
     HIBC *hibc = [HIBC decode:@"+$$+4050928200001LC"];
@@ -525,7 +533,6 @@
     NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
 }
 
-
 - (void)test31 {
     HIBC *hibc = [HIBC decode:@"+$$+5052710001LC"];
 
@@ -540,7 +547,6 @@
     NSAssert([_linkChar isEqualToString:hibc.linkCharacter], @"Link Character");
     NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
 }
-
 
 - (void)test32 {
     HIBC *hibc = [HIBC decode:@"+$$+605271200001LC"];
@@ -558,7 +564,6 @@
     NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
 }
 
-
 - (void)test33 {
     HIBC *hibc = [HIBC decode:@"+$$+70001LC"];
 
@@ -570,5 +575,591 @@
 /*
     Concatenated Barcode Tests
  */
+
+- (void)testC01 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/05271C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+        
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC02 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$3C001C"];
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC03 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$09053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC04 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$20928053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC05 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$30509283C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC06 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$4050928223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    dateComponents.hour = 22;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC07 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$5052713C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC08 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$605271223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    dateComponents.hour = 22;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC09 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$73C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC10 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$82409053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC11 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$82420928053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC12 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$82430509283C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC13 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$8244050928223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    dateComponents.hour = 22;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC14 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$8245052713C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC15 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$824605271223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    dateComponents.hour = 22;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC16 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$82473C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC17 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$824C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_twoDigitQty == hibc.quantity, @"2 Digit Quantity");
+}
+
+- (void)testC18 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$90010009053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC19 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$90010020928053C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC20 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$90010030509283C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC21 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$9001004050928223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    dateComponents.hour = 22;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC22 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$9001005052713C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC23 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$900100605271223C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.hour = 22;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC24 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$90010073C001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert([_lot isEqualToString:hibc.lot], @"Lot");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC25 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$900100C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+    NSAssert(_fiveDigitQty == hibc.quantity, @"5 Digit Quantity");
+}
+
+- (void)testC26 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$+0001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC27 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+09050001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC28 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+20928050001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC29 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+30509280001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC30 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+4050928200001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.hour = 20;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC31 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+5052710001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC32 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+605271200001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSDateComponents *dateComponents = [[NSDateComponents alloc] init];
+    dateComponents.month = 9;
+    dateComponents.day = 28;
+    dateComponents.hour = 20;
+    dateComponents.year = 2005;
+    NSDate *expDate = [_gregorian dateFromComponents:dateComponents];
+    
+    NSAssert([expDate isEqualToDate:hibc.expirationDate], @"Expiration Date");
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
+
+- (void)testC33 {
+    HIBC *hibc = [HIBC decode:@"+Z999009993020351/$$+70001C"];
+    
+    NSAssert([_manufCode isEqualToString:hibc.labelerIDCode], @"Labeler ID Code");
+    NSAssert([_productNumber isEqualToString:hibc.productNumber], @"Product Number");
+    NSAssert(_uom == hibc.unitOfMeasure, @"Unit of Measure");
+    
+    NSAssert([_serial isEqualToString:hibc.serial], @"Serial");
+    NSAssert(!hibc.linkCharacter, @"Link Character");
+    NSAssert([_checkChar isEqualToString:hibc.checkCharacter], @"Check Character");
+}
 
 @end
