@@ -32,37 +32,19 @@ namespace HibcBarcode
 		public enum BarcodeType
 		{
 			Concatenated = 1,
-			Line1 = 2,
-			Line2 = 3
+			Primary = 2,
+			Secondary = 3,
+			Merged = 4
 		}
 
 		public enum ResultCode
 		{
 			Success = 0,
-			EmptyBarcode = 1,
-			BarcodeNotHibc = 2,
-			InvalidBarcode = 3,
-			InvalidExpirationDate = 4,
-			EmptyCheckCharacter = 5,
-			EmptyLinkCharacter = 6,
-			InvalidQuantity = 7,
-			InvalidLine1 = 8
-		}
-
-		private enum HibcProperties
-		{
-			ResultCode = 1,
-			LabelerId = 2,
-			ProductNumber = 3,
-			Lot = 4,
-			Serial = 5,
-			CheckCharacter = 6,
-			LinkCharacter = 7,
-			ExpirationDate = 8,
-			BarocodeType = 9,
-			MergedBarcode = 10,
-			UnitOfMeasure = 11,
-			Quantity = 12
+			InvalidBarcode = 1,
+			InvalidExpirationDate = 2,
+			EmptyCheckCharacter = 3,
+			EmptyLinkCharacter = 4,
+			InvalidQuantity = 5
 		}
 
 		public HibcBarcode (String barcode)
@@ -73,6 +55,51 @@ namespace HibcBarcode
 		public ResultCode parse ()
 		{
 			return parse (this);
+		}
+
+		public bool merge (HibcBarcode hibc)
+		{
+			if (this.barcodeType == BarcodeType.Concatenated ||
+			    hibc.barcodeType == BarcodeType.Concatenated ||
+			    this.barcodeType == hibc.barcodeType) {
+				return false;
+			}
+
+			HibcBarcode primary = this.barcodeType == BarcodeType.Primary ? this : hibc;
+			HibcBarcode secondary = this.barcodeType == BarcodeType.Secondary ? this : hibc;
+			if (!isPair (primary, secondary)) {
+				return false;
+			}
+
+			this.barcodeType = BarcodeType.Merged;
+			if (this == primary) {
+				// Merge secondary
+				this.mergedBarcode = secondary.barcode;
+				this.expirationDate = secondary.expirationDate;
+				this.lot = secondary.lot;
+				this.quantity = secondary.quantity;
+				this.serial = secondary.serial;
+
+			} else {
+				// Merge primary
+				this.mergedBarcode = primary.barcode;
+				this.labelerId = primary.labelerId;
+				this.productNumber = primary.productNumber;
+				this.unitOfMeasure = primary.unitOfMeasure;
+			}
+
+			// Success
+			return true;
+		}
+
+		public static bool isPair (HibcBarcode primary, HibcBarcode secondary)
+		{
+			if (!primary || primary.barcodeType != BarcodeType.Primary ||
+			    !secondary || secondary.barcodeType != BarcodeType.Secondary) {
+				return false;
+			}
+
+			return primary.checkCharacter == secondary.linkCharacter;
 		}
 
 		private static ResultCode parse (HibcBarcode hibc)
@@ -109,22 +136,22 @@ namespace HibcBarcode
 				barcode = barcode + potentialChackAndLinkChars;
 				if (isLetter (barcode [0])) {
 
-					// Line 1
-					hibc.barcodeType = BarcodeType.Line1;
-					return parseLine1 (hibc);
+					// Primary
+					hibc.barcodeType = BarcodeType.Primary;
+					return parsePrimary (hibc, barcode);
 				} else {
 
-					// Line 2
-					hibc.barcodeType = BarcodeType.Line2;
-					return parseLine2 (hibc);
+					// Secondary
+					hibc.barcodeType = BarcodeType.Secondary;
+					return parseSecondary (hibc, barcode);
 				}
 			} else if (split.Length == 2) {
 
 				// Concatenated
 				hibc.barcodeType = BarcodeType.Concatenated;
-				ResultCode rc = parseLine1 (hibc, split [0]);
+				ResultCode rc = parsePrimary (hibc, split [0]);
 				if (rc == ResultCode.Success) {
-					rc = parseLine2 (hibc, split [1] + potentialChackAndLinkChars);
+					rc = parsparseSecondaryeLine2 (hibc, split [1] + potentialChackAndLinkChars);
 				}
 				return rc;
 			} else {
@@ -132,17 +159,17 @@ namespace HibcBarcode
 			}
 		}
 
-		private static ResultCode parseLine1 (HibcBarcode hibc, string barcode)
+		private static ResultCode parsePrimary (HibcBarcode hibc, string barcode)
 		{
 			if (barcode.Length < 4) {
-				return ResultCode.InvalidLine1;
+				return ResultCode.InvalidBarcode;
 			}
 
 			// Labeler Id
 			hibc.labelerId = barcode.Substring (0, 4);
 			barcode = barcode.Remove (0, 4);
 			if (barcode.Length < 1) {
-				return ResultCode.InvalidLine1;
+				return ResultCode.InvalidBarcode;
 			}
 
 			// Check Character. If Concatenated skip this as the check char is in the second part of the barcode
@@ -150,7 +177,7 @@ namespace HibcBarcode
 				hibc.checkCharacter = barcode.Substring (barcode.Length - 1);
 				barcode = barcode.Remove (barcode.Length - 1);
 				if (barcode.Length < 1) {
-					return ResultCode.InvalidLine1;
+					return ResultCode.InvalidBarcode;
 				}
 			}
 
@@ -164,57 +191,48 @@ namespace HibcBarcode
 			return ResultCode.Success;
 		}
 
-		private static ResultCode parseLine2 (Hashtable hash, string barcode)
+		private static ResultCode parseSecondary (HibcBarcode hibc, string barcode)
 		{
-			// TODO refactor to be like parseLine1 to return the RC
-
-			ResultCode rc;
 			if (barcode.Length > 0 && isNumber (barcode [0])) {
 				if (barcode.Length < 5) {
-					return hasError (ResultCode.InvalidExpirationDate);
+					return ResultCode.InvalidExpirationDate;
 				}
 
+				// Expiration Date
 				DateTime date = DateTime.ParseExact (barcode.Substring (0, 5), "YYDDD", null);
 				if (!date) {
-					hasError (ResultCode.InvalidExpirationDate);
+					return ResultCode.InvalidExpirationDate;
 				}
-				hash.Add (HibcProperties.ExpirationDate, date);
-				rc = parseQtyCheckLink (false, hash, barcode.Substring (5));
+				hibc.expirationDate = date;
+				return parseQtyCheckLink (false, hibc, barcode.Substring (5));
 			} else if (barcode.Length > 2 && barcode [0] == '$' && isNumber (barcode [1])) {
-				rc = parseQtyCheckLink (false, hash, barcode.Substring (1));
+				return parseQtyCheckLink (false, hibc, barcode.Substring (1));
 			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$+" && isNumber (barcode [2])) {
-				rc = parseQtyCheckLink (true, hash, barcode.Substring (2));
+				return parseQtyCheckLink (true, hibc, barcode.Substring (2));
 			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$$" && isNumber (barcode [2])) {
-				rc = parseQtyCheckLink (false, hash, barcode.Substring (2));
+				ResultCode rc = parseQtyCheckLink (false, hibc, barcode.Substring (2));
 				if (rc != ResultCode.Success) {
-					continue;
+					return rc;
 				}
-
-				// TODO Exp Date from lot
+				return extractExpirationDate (hibc);
 			} else if (barcode.Length > 3 && barcode.Substring (0, 3) == "$$+") {
-				rc = parseQtyCheckLink (true, hash, barcode.Substring (3));
+				ResultCode rc = parseQtyCheckLink (true, hibc, barcode.Substring (3));
 				if (rc != ResultCode.Success) {
-					continue;
+					return rc;
 				}
-
-				// TODO Expiration Date from serial
+				return extractExpirationDate (hibc);
 			} else {
-				rc = ResultCode.InvalidBarcode;
+				return ResultCode.InvalidBarcode;
 			}
-
-			return rc;
 		}
 
-		private static ResultCode parseQtyCheckLink (bool isSerialized, Hashtable hash, string barcode)
+		private static ResultCode parseQtyCheckLink (bool isSerialized, HibcBarcode hibc, string barcode)
 		{
-			// TODO refactor to be like parseLine1 and take in HIBC obj, not hash
-
 			if (barcode.Length < 1) {
 				return ResultCode.InvalidBarcode;
 			}
 
 			// Quantity
-
 			if (isNumber (barcode [0])) {
 				int qtyIdentifier = Convert.ToInt32 (barcode [0]);
 				int quantityLength;
@@ -232,11 +250,12 @@ namespace HibcBarcode
 				}
 
 				if (quantityLength > 0) {
+					
 					// Dont include the Qty Identifier in Qty
-					int qty = Convert.ToInt32 (barcode.Substring (1, quantityLength + 1));
+					hibc.quantity = Convert.ToInt32 (barcode.Substring (1, quantityLength + 1));
+					
 					// Pull out both the Qty Identifier and Qty
 					barcode = barcode.Remove (0, quantityLength + 1);
-					hash.Add (HibcProperties.Quantity, qty);
 				}
 			}
 
@@ -244,19 +263,93 @@ namespace HibcBarcode
 			if (barcode.Length < 1) {
 				return ResultCode.EmptyCheckCharacter;
 			}
-			hash.Add (HibcProperties.CheckCharacter, barcode.Substring (barcode.Length - 1));
+			hibc.checkCharacter = barcode.Substring (barcode.Length - 1);
 			barcode = barcode.Remove (barcode.Length - 1);
 
 			// Lot / Serial
 			HibcProperties lotSerialProperty = isSerialized ? HibcProperties.Serial : HibcProperties.Lot;
-			if (hash [HibcProperties.BarocodeType] == BarcodeType.Line2) {
+			if (hibc.barcodeType == BarcodeType.Secondary) {
 				if (barcode.Length < 1) {
 					return ResultCode.EmptyLinkCharacter;
 				}
-				hash.Add (HibcProperties.LinkCharacter, barcode.Substring (barcode.Length - 1));
-				hash.Add (lotSerialProperty, barcode.Remove (barcode.Length - 1));
+				hibc.linkCharacter = barcode.Substring (barcode.Length - 1);
+				hibc [lotSerialProperty] = barcode.Remove (barcode.Length - 1);
 			} else {
-				hash.Add (lotSerialProperty, barcode);
+				hibc [lotSerialProperty] = barcode;
+			}
+
+			return ResultCode.Success;
+		}
+
+		private static ResultCode extractExpirationDate (HibcBarcode hibc)
+		{
+			string lotOrSerial;
+			if (hibc.lot.Length > 0) {
+				lotOrSerial = hibc.lot;
+			} else if (hibc.serial.Length > 0) {
+				lotOrSerial = hibc.serial;
+			} else {
+				return ResultCode.InvalidExpirationDate;
+			}
+			 
+			int formatIdentifier = Convert.ToInt32 (lotOrSerial [0]);
+			string dateFormat;
+			switch (formatIdentifier) {
+			case 0:
+			case 1:
+				dateFormat = "MMYY";
+				break;
+			case 2:
+				dateFormat = "MMDDYY";
+				break;
+			case 3:
+				dateFormat = "YYMMDD";
+				break;
+			case 4:
+				dateFormat = "YYMMDDHH";
+				break;
+			case 5:
+				dateFormat = "YYDDD";
+				break;
+			case 6:
+				dateFormat = "YYDDDHH";
+				break;
+			case 7:
+				// no date following 7
+				lotOrSerial = lotOrSerial.Remove (0, 1);
+				if (hibc.lot.Length > 0) {
+					hibc.lot = lotOrSerial;
+				} else if (hibc.serial.Length > 0) {
+					hibc.lot = lotOrSerial;
+				}
+				return ResultCode.Success;				
+			default:
+				// no date
+				return ResultCode.Success;
+			}
+
+			// Remove formatIdentifier if necessary
+			if (formatIdentifier > 1) {
+				lotOrSerial = lotOrSerial.Remove (0, 1);	
+			}
+
+			// Check format length before date conversion
+			if (lotOrSerial.Length < dateFormat.Length) {
+				return ResultCode.InvalidExpirationDate;
+			}
+
+			// Date conversion
+			DateTime date = DateTime.ParseExact (lotOrSerial.Substring (0, dateFormat.Length), dateFormat, null);
+			if (!date) {
+				return ResultCode.InvalidExpirationDate;
+			}
+
+			// Assign the remaining string to either lot or serial
+			hibc.expirationDate = date;
+			if (hibc.lot.Length > 0) {
+				hibc.lot = lotOrSerial;
+			} else if (hibc.serial.Length > 0) {
+				hibc.serial = lotOrSerial;
 			}
 
 			return ResultCode.Success;
