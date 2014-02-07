@@ -72,19 +72,6 @@ namespace HibcBarcode
 
 		public ResultCode parse ()
 		{
-//			Hashtable response = parse (this.barcode);
-//			if (response [HibcProperties.ResultCode] == ResultCode.Success) {
-//				this.labelerId = response [HibcProperties.LabelerId];
-//				this.productNumber = response [HibcProperties.ProductNumber];
-//				this.lot = response [HibcProperties.Lot];
-//				this.serial = response [HibcProperties.Serial];
-//				this.checkCharacter = response [HibcProperties.CheckCharacter];
-//				this.linkCharacter = response [HibcProperties.LinkCharacter];
-//				this.expirationDate = response [HibcProperties.ExpirationDate];
-//				this.unitOfMeasure = response [HibcProperties.UnitOfMeasure];
-//				this.quantity = response [HibcProperties.Quantity];
-//			}
-//			return response [HibcProperties.ResultCode];
 			return parse (this);
 		}
 
