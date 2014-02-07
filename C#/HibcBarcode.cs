@@ -168,18 +168,13 @@ namespace HibcBarcode
 			}
 
 			// Unit Of Measure
-			string unitOfMeasure = barcode.Substring (barcode.Length - 1);
-			hash.Add (HibcProperties.UnitOfMeasure, Convert.ToInt32 (unitOfMeasure));
+			hibc.unitOfMeasure = Convert.ToInt32 (barcode.Substring (barcode.Length - 1));
 			barcode = barcode.Remove (barcode.Length - 1);
-			if (barcode.Length < 1) {
-				return hasError (ResultCode.InvalidLine1);
-			}
 
 			// Product Number
-			hash.Add (HibcProperties.ProductNumber, barcode);
+			hibc.productNumber = barcode;
 
-			hash.Add (HibcProperties.ResultCode, ResultCode.Success);
-			return hash;
+			return ResultCode.Success;
 		}
 
 		private static ResultCode parseLine2 (Hashtable hash, string barcode)
