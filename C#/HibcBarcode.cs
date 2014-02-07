@@ -204,19 +204,19 @@ namespace HibcBarcode
 					return ResultCode.InvalidExpirationDate;
 				}
 				hibc.expirationDate = date;
-				return parseQtyCheckLink (false, hibc, barcode.Substring (5));
+				return parseQtyCheckLinkLotSerial (false, hibc, barcode.Substring (5));
 			} else if (barcode.Length > 2 && barcode [0] == '$' && isNumber (barcode [1])) {
-				return parseQtyCheckLink (false, hibc, barcode.Substring (1));
+				return parseQtyCheckLinkLotSerial (false, hibc, barcode.Substring (1));
 			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$+" && isNumber (barcode [2])) {
-				return parseQtyCheckLink (true, hibc, barcode.Substring (2));
+				return parseQtyCheckLinkLotSerial (true, hibc, barcode.Substring (2));
 			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$$" && isNumber (barcode [2])) {
-				ResultCode rc = parseQtyCheckLink (false, hibc, barcode.Substring (2));
+				ResultCode rc = parseQtyCheckLinkLotSerial (false, hibc, barcode.Substring (2));
 				if (rc != ResultCode.Success) {
 					return rc;
 				}
 				return extractExpirationDate (hibc);
 			} else if (barcode.Length > 3 && barcode.Substring (0, 3) == "$$+") {
-				ResultCode rc = parseQtyCheckLink (true, hibc, barcode.Substring (3));
+				ResultCode rc = parseQtyCheckLinkLotSerial (true, hibc, barcode.Substring (3));
 				if (rc != ResultCode.Success) {
 					return rc;
 				}
@@ -226,7 +226,7 @@ namespace HibcBarcode
 			}
 		}
 
-		private static ResultCode parseQtyCheckLink (bool isSerialized, HibcBarcode hibc, string barcode)
+		private static ResultCode parseQtyCheckLinkLotSerial (bool isSerialized, HibcBarcode hibc, string barcode)
 		{
 			if (barcode.Length < 1) {
 				return ResultCode.InvalidBarcode;
