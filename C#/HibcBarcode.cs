@@ -179,6 +179,8 @@ namespace HibcBarcode
 
 		private static ResultCode parseLine2 (Hashtable hash, string barcode)
 		{
+			// TODO refactor to be like parseLine1 to return the RC
+
 			ResultCode rc;
 			if (barcode.Length > 0 && isNumber (barcode [0])) {
 				if (barcode.Length < 5) {
@@ -209,7 +211,6 @@ namespace HibcBarcode
 				}
 
 				// TODO Expiration Date from serial
-
 			} else {
 				rc = ResultCode.InvalidBarcode;
 			}
@@ -219,6 +220,8 @@ namespace HibcBarcode
 
 		private static ResultCode parseQtyCheckLink (bool isSerialized, Hashtable hash, string barcode)
 		{
+			// TODO refactor to be like parseLine1 and take in HIBC obj, not hash
+
 			if (barcode.Length < 1) {
 				return ResultCode.InvalidBarcode;
 			}
@@ -280,11 +283,6 @@ namespace HibcBarcode
 		private static bool isNumber (char c)
 		{
 			return Regex.IsMatch (c, @"^[0-9]+$");
-		}
-
-		private static Hashtable hasError (ResultCode rc)
-		{
-			return new Hashtable (HibcProperties.ResultCode, rc);
 		}
 	}
 }
