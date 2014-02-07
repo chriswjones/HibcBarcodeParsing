@@ -7,27 +7,30 @@ namespace HibcBarcode
 	{
 		public string barcode { get; }
 
-		public string mergedBarcode { get; }
+		public string mergedBarcode { get; private set; }
 
-		public BarcodeType barcodeType { get; }
+		public BarcodeType barcodeType { get; private set; }
 
-		public string labelerId { get; }
+		public string labelerId { get; private set; }
 
-		public string productNumber { get; }
+		public string productNumber { get; private set; }
 
-		public string lot{ get; set; }
+		public string lot{ get; private set; }
 
-		public string serial{ get; }
+		public string serial{ get; private set; }
 
-		public char checkCharacter{ get; }
+		public char checkCharacter{ get; private set; }
 
-		public char linkCharacter{ get; }
+		public char linkCharacter{ get; private set; }
 
-		public DateTime expirationDate { get; }
+		public DateTime expirationDate { get; private set; }
 
-		public int unitOfMeasure { get; }
+		public int unitOfMeasure { get; private set; }
 
-		public enum BarcodeType {
+		public int quantity { get; private set; }
+
+		public enum BarcodeType
+		{
 			Concatenated = 1,
 			Line1 = 2,
 			Line2 = 3
@@ -58,7 +61,8 @@ namespace HibcBarcode
 			ExpirationDate = 8,
 			BarocodeType = 9,
 			MergedBarcode = 10,
-			UnitOfMeasure = 11
+			UnitOfMeasure = 11,
+			Quantity = 12
 		}
 
 		public HibcBarcode (String barcode)
@@ -68,22 +72,25 @@ namespace HibcBarcode
 
 		public ResultCode parse ()
 		{
-			Hashtable response = parse (this.barcode);
-			if (response [HibcProperties.ResultCode] == ResultCode.Success) {
-				this.labelerId = response [HibcProperties.LabelerId];
-				this.productNumber = response [HibcProperties.ProductNumber];
-				this.lot = response [HibcProperties.Lot];
-				this.serial = response [HibcProperties.Serial];
-				this.checkCharacter = response [HibcProperties.CheckCharacter];
-				this.linkCharacter = response [HibcProperties.LinkCharacter];
-				this.expirationDate = response [HibcProperties.ExpirationDate];
-			}
-			return response [HibcProperties.ResultCode];
+//			Hashtable response = parse (this.barcode);
+//			if (response [HibcProperties.ResultCode] == ResultCode.Success) {
+//				this.labelerId = response [HibcProperties.LabelerId];
+//				this.productNumber = response [HibcProperties.ProductNumber];
+//				this.lot = response [HibcProperties.Lot];
+//				this.serial = response [HibcProperties.Serial];
+//				this.checkCharacter = response [HibcProperties.CheckCharacter];
+//				this.linkCharacter = response [HibcProperties.LinkCharacter];
+//				this.expirationDate = response [HibcProperties.ExpirationDate];
+//				this.unitOfMeasure = response [HibcProperties.UnitOfMeasure];
+//				this.quantity = response [HibcProperties.Quantity];
+//			}
+//			return response [HibcProperties.ResultCode];
+			return parse (this);
 		}
 
-		private static Hashtable parse (String rawBarcode)
+		private static ResultCode parse (HibcBarcode hibc)
 		{
-			string barcode = String.Copy (rawBarcode);
+			string barcode = String.Copy (hibc.barcode);
 			if (!barcode || this.barcode.Length < 1) {
 				return hasError (ResultCode.BarcodeNotHibc);
 			}
@@ -113,64 +120,56 @@ namespace HibcBarcode
 			string[] split = barcode.Split (new Char[]{ '/' });
 			if (split.Length == 1) {
 				barcode = barcode + potentialChackAndLinkChars;
+				if (isLetter (barcode [0])) {
 
-				// if the first character is a letter, it is a Line1 barcode
-				if (Regex.IsMatch (barcode [0], @"^[a-zA-Z]+$")) {
-					return parseLine1 (BarcodeType.Line1, barcode);
+					// Line 1
+					hibc.barcodeType = BarcodeType.Line1;
+					return parseLine1 (hibc);
 				} else {
-					return parseLine2 (BarcodeType.Line2, barcode);
+
+					// Line 2
+					hibc.barcodeType = BarcodeType.Line2;
+					return parseLine2 (hibc);
 				}
 			} else if (split.Length == 2) {
+
 				// Concatenated
-				Hashtable hash1 = parseLine1 (BarcodeType.Concatenated, split[0]);
-				if (hash1 [HibcProperties.ResultCode] != ResultCode.Success) {
-					return hash1;
+				hibc.barcodeType = BarcodeType.Concatenated;
+				ResultCode rc = parseLine1 (hibc, split [0]);
+				if (rc == ResultCode.Success) {
+					rc = parseLine2 (hibc, split [1] + potentialChackAndLinkChars);
 				}
-
-				Hashtable hash2 = parseLine2 (BarcodeType.Concatenated, split[1] + potentialChackAndLinkChars);
-				if (hash2 [HibcProperties.ResultCode] != ResultCode.Success) {
-					return hash2;
-				}
-
-				// Merge Hash2 into Hash1
-				foreach (DictionaryEntry pair in hash2) {
-					hash1.Add (pair.Key, pair.Value);
-				}
-
-				return hash1;
+				return rc;
 			} else {
-				return hasError(ResultCode.InvalidBarcode);
+				return ResultCode.InvalidBarcode;
 			}
 		}
 
-		private static Hashtable parseLine1 (BarcodeType barcodeType, string barcode)
+		private static ResultCode parseLine1 (HibcBarcode hibc, string barcode)
 		{
 			if (barcode.Length < 4) {
-				return hasError (ResultCode.InvalidLine1);
+				return ResultCode.InvalidLine1;
 			}
 
-			Hashtable hash = new Hashtable ();
-			hash.Add (HibcProperties.BarocodeType, barcodeType);
-
 			// Labeler Id
-			hash.Add (HibcProperties.LabelerId, barcode.Substring (0, 4));
+			hibc.labelerId = barcode.Substring (0, 4);
 			barcode = barcode.Remove (0, 4);
 			if (barcode.Length < 1) {
-				return hasError (ResultCode.InvalidLine1);
+				return ResultCode.InvalidLine1;
 			}
 
 			// Check Character. If Concatenated skip this as the check char is in the second part of the barcode
-			if (barcodeType != BarcodeType.Concatenated) {
-				hash.Add(HibcProperties.CheckCharacter, barcode.Substring(barcode.Length - 1));
+			if (hibc.barcodeType != BarcodeType.Concatenated) {
+				hibc.checkCharacter = barcode.Substring (barcode.Length - 1);
 				barcode = barcode.Remove (barcode.Length - 1);
 				if (barcode.Length < 1) {
-					return hasError (ResultCode.InvalidLine1);
+					return ResultCode.InvalidLine1;
 				}
 			}
 
 			// Unit Of Measure
 			string unitOfMeasure = barcode.Substring (barcode.Length - 1);
-			hash.Add (HibcProperties.UnitOfMeasure, Convert.ToInt32(unitOfMeasure));
+			hash.Add (HibcProperties.UnitOfMeasure, Convert.ToInt32 (unitOfMeasure));
 			barcode = barcode.Remove (barcode.Length - 1);
 			if (barcode.Length < 1) {
 				return hasError (ResultCode.InvalidLine1);
@@ -183,14 +182,109 @@ namespace HibcBarcode
 			return hash;
 		}
 
-		private static Hashtable parseLine2 (Hashtable response, string barcode) {
-			Hashtable hash = new Hashtable ();
-			hash.Add (HibcProperties.BarocodeType, barcodeType);
+		private static ResultCode parseLine2 (Hashtable hash, string barcode)
+		{
+			ResultCode rc;
+			if (barcode.Length > 0 && isNumber (barcode [0])) {
+				if (barcode.Length < 5) {
+					return hasError (ResultCode.InvalidExpirationDate);
+				}
 
-			// TODO
+				DateTime date = DateTime.ParseExact (barcode.Substring (0, 5), "YYDDD", null);
+				if (!date) {
+					hasError (ResultCode.InvalidExpirationDate);
+				}
+				hash.Add (HibcProperties.ExpirationDate, date);
+				rc = parseQtyCheckLink (false, hash, barcode.Substring (5));
+			} else if (barcode.Length > 2 && barcode [0] == '$' && isNumber (barcode [1])) {
+				rc = parseQtyCheckLink (false, hash, barcode.Substring (1));
+			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$+" && isNumber (barcode [2])) {
+				rc = parseQtyCheckLink (true, hash, barcode.Substring (2));
+			} else if (barcode.Length > 3 && barcode.Substring (0, 2) == "$$" && isNumber (barcode [2])) {
+				rc = parseQtyCheckLink (false, hash, barcode.Substring (2));
+				if (rc != ResultCode.Success) {
+					continue;
+				}
 
-			hash.Add (HibcProperties.ResultCode, ResultCode.Success);
-			return hash;
+				// TODO Exp Date from lot
+			} else if (barcode.Length > 3 && barcode.Substring (0, 3) == "$$+") {
+				rc = parseQtyCheckLink (true, hash, barcode.Substring (3));
+				if (rc != ResultCode.Success) {
+					continue;
+				}
+
+				// TODO Expiration Date from serial
+
+			} else {
+				rc = ResultCode.InvalidBarcode;
+			}
+
+			return rc;
+		}
+
+		private static ResultCode parseQtyCheckLink (bool isSerialized, Hashtable hash, string barcode)
+		{
+			if (barcode.Length < 1) {
+				return ResultCode.InvalidBarcode;
+			}
+
+			// Quantity
+
+			if (isNumber (barcode [0])) {
+				int qtyIdentifier = Convert.ToInt32 (barcode [0]);
+				int quantityLength;
+				switch (qtyIdentifier) {
+				case 8:
+					quantityLength = 2;
+					break;
+				case 9:
+					quantityLength = 5;
+					break;
+				default:
+					// no qty
+					quantityLength = 0;
+					break;
+				}
+
+				if (quantityLength > 0) {
+					// Dont include the Qty Identifier in Qty
+					int qty = Convert.ToInt32 (barcode.Substring (1, quantityLength + 1));
+					// Pull out both the Qty Identifier and Qty
+					barcode = barcode.Remove (0, quantityLength + 1);
+					hash.Add (HibcProperties.Quantity, qty);
+				}
+			}
+
+			// Check Character
+			if (barcode.Length < 1) {
+				return ResultCode.EmptyCheckCharacter;
+			}
+			hash.Add (HibcProperties.CheckCharacter, barcode.Substring (barcode.Length - 1));
+			barcode = barcode.Remove (barcode.Length - 1);
+
+			// Lot / Serial
+			HibcProperties lotSerialProperty = isSerialized ? HibcProperties.Serial : HibcProperties.Lot;
+			if (hash [HibcProperties.BarocodeType] == BarcodeType.Line2) {
+				if (barcode.Length < 1) {
+					return ResultCode.EmptyLinkCharacter;
+				}
+				hash.Add (HibcProperties.LinkCharacter, barcode.Substring (barcode.Length - 1));
+				hash.Add (lotSerialProperty, barcode.Remove (barcode.Length - 1));
+			} else {
+				hash.Add (lotSerialProperty, barcode);
+			}
+
+			return ResultCode.Success;
+		}
+
+		private static bool isLetter (char c)
+		{
+			return Regex.IsMatch (c, @"^[a-zA-Z]+$");
+		}
+
+		private static bool isNumber (char c)
+		{
+			return Regex.IsMatch (c, @"^[0-9]+$");
 		}
 
 		private static Hashtable hasError (ResultCode rc)
