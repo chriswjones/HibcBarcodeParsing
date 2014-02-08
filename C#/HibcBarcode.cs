@@ -23,6 +23,7 @@ namespace HibcBarcode
 
 		public char linkCharacter{ get; private set; }
 
+		// TODO: convert to expirationMonth, expirationDay, etc...
 		public DateTime expirationDate { get; private set; }
 
 		public int unitOfMeasure { get; private set; }
